@@ -6,7 +6,7 @@ const path = require("path");
 const fs = require("fs");
 
 const OUTPUT_DIR = path.resolve(__dirname, "output");
-const outputPath = path.join(OUTPUT_DIR, "team.html");
+const outputPath = path.join(OUTPUT_DIR, `team.html`);
 
 const render = require("./lib/htmlRenderer");
 
@@ -33,6 +33,7 @@ function startBuild() {
     inquirer.prompt(questions).then(answers => {
         console.log('\n')
         teamName = answers.teamName
+        console.log(teamName)
         chooseType();
     });
 };
@@ -263,11 +264,6 @@ function addIntern() {
     //chooseType if yes - start render if no
 };
 
-function startRender() {
-    // ask if list of employees is everyone
-    //if no chooseType if yes render
-    // write file to output
-};
 
 function loopPrompt(){
     // ask if they have anyone else to add
@@ -281,14 +277,44 @@ function loopPrompt(){
     ]
     //either cycle back to chooseType or start render
     inquirer.prompt(questions).then(answers => {
+        // console.log(employees)
         if(answers.loop === 'yes'){
             chooseType();
         }else{
             startRender();
         };
-        console.log(employees)
     });
 }
+
+function startRender() {
+    const questions = [
+        {
+            type: 'list',
+            name: 'check',
+            message: `is this everyone?`,
+            choices: ['yes', 'no']
+        },
+    ];
+    // ask if list of employees is everyone
+    console.log(`\n`)
+    console.log(`${employees.map(function (key) {
+        return key.name + " - " + key.getRole() + "\n"       
+    }).join("")}`)
+    //if no chooseType if yes render
+    inquirer.prompt(questions).then(answers => {
+        // console.log(employees)
+        if(answers.check === 'yes'){
+            // write file to output
+            fs.writeFile(outputPath, render(employees), function (err) {
+                if (err) throw err;
+                console.log(`Saved to team.html`);
+              });
+        }else{
+            chooseType();
+        };
+    });
+};
+
 
 startBuild();
 // Write code to use inquirer to gather information about the development team members,
